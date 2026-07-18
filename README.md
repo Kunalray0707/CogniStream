@@ -270,3 +270,4 @@ npx eslint src                      # confirmed zero lint errors
 docker compose up -d --build
 docker compose exec backend python -m app.scripts.import_csv --reset
 ```
+# CogniStream
