@@ -1,0 +1,46 @@
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: #0b0e14;
+  color: #e4e7ed;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+::selection {
+  background: rgba(45, 212, 191, 0.35);
+}
+
+/* Thin, IDE-like scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #12151f;
+}
+::-webkit-scrollbar-thumb {
+  background: #232a3b;
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2d3448;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
