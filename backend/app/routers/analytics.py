@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query
 from clickhouse_driver import Client
@@ -12,6 +12,7 @@ from app.schemas.analytics import (
     CognitiveLoadDistribution,
     FlowStateSummary,
     SessionRecord,
+    DeveloperRecord,
 )
 
 router = APIRouter(prefix="/analytics", tags=["Analytics"])
@@ -21,6 +22,12 @@ router = APIRouter(prefix="/analytics", tags=["Analytics"])
 def dashboard(client: Client = Depends(get_db)):
     """High-level KPIs shown at the top of the dashboard."""
     return analytics_service.get_dashboard_summary(client)
+
+
+@router.get("/developers", response_model=List[DeveloperRecord])
+def developers(client: Client = Depends(get_db)):
+    """Developer profiles and aggregate metrics."""
+    return analytics_service.get_developers(client)
 
 
 @router.get("/trend", response_model=List[TrendPoint])
@@ -57,7 +64,11 @@ def flow_state(client: Client = Depends(get_db)):
 def sessions(
     limit: int = Query(20, ge=1, le=200),
     offset: int = Query(0, ge=0),
+    load_level: Optional[str] = Query(None, description="Filter by cognitive load level: Low, Medium, High"),
+    flow_only: Optional[bool] = Query(None, description="Filter sessions in flow state only"),
     client: Client = Depends(get_db),
 ):
     """Paginated list of individual coding sessions, most recent first."""
-    return analytics_service.get_sessions(client, limit=limit, offset=offset)
+    return analytics_service.get_sessions(
+        client, limit=limit, offset=offset, load_level=load_level, flow_only=flow_only
+    )

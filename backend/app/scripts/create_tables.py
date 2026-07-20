@@ -28,6 +28,21 @@ def create_tables(reset: bool = False) -> None:
 
     print("All CogniStream tables are ready.")
 
+    # Auto-seed initial data if tables are empty
+    try:
+        count = client.execute("SELECT count() FROM coding_sessions")[0][0]
+        if count == 0:
+            print("Table 'coding_sessions' is empty. Auto-seeding initial CSV dataset...")
+            from app.scripts.import_csv import DEFAULT_CSV_PATH, date, transform, load_to_clickhouse
+            if DEFAULT_CSV_PATH.exists():
+                coding_sessions, cognitive_metrics = transform(DEFAULT_CSV_PATH, date(2025, 1, 1))
+                load_to_clickhouse(coding_sessions, cognitive_metrics, reset=False)
+                print("Auto-seeding complete.")
+            else:
+                print(f"Warning: Default CSV path {DEFAULT_CSV_PATH} not found for auto-seeding.")
+    except Exception as seed_exc:
+        print(f"Auto-seeding skipped due to error: {seed_exc}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Create CogniStream ClickHouse tables")

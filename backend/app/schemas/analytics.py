@@ -48,3 +48,13 @@ class SessionRecord(BaseModel):
     productivity_score: float
     flow_state: bool
     recommendation: str
+
+
+class DeveloperRecord(BaseModel):
+    id: int
+    name: str
+    email: str
+    role: str
+    total_sessions: int
+    avg_cognitive_load: float
+    avg_productivity_score: float

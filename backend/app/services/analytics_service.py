@@ -148,9 +148,28 @@ def get_flow_state_summary(client: Client) -> list[dict]:
     ]
 
 
-def get_sessions(client: Client, limit: int = 20, offset: int = 0) -> list[dict]:
-    rows = client.execute(
-        """
+def get_sessions(
+    client: Client,
+    limit: int = 20,
+    offset: int = 0,
+    load_level: str | None = None,
+    flow_only: bool | None = None,
+) -> list[dict]:
+    where_clauses = []
+    params = {"limit": limit, "offset": offset}
+
+    if load_level and load_level.strip():
+        where_clauses.append("cm.cognitive_load_level = %(load_level)s")
+        params["load_level"] = load_level.strip().capitalize()
+
+    if flow_only is True:
+        where_clauses.append("cs.flow_state = 1")
+    elif flow_only is False:
+        where_clauses.append("cs.flow_state = 0")
+
+    where_sql = f"WHERE {' AND '.join(where_clauses)}" if where_clauses else ""
+
+    query = f"""
         SELECT
             cs.id,
             cs.session_date,
@@ -164,11 +183,11 @@ def get_sessions(client: Client, limit: int = 20, offset: int = 0) -> list[dict]
             cm.recommendation
         FROM coding_sessions cs
         INNER JOIN cognitive_metrics cm ON cs.id = cm.session_id
+        {where_sql}
         ORDER BY cs.session_date DESC
         LIMIT %(limit)s OFFSET %(offset)s
-        """,
-        {"limit": limit, "offset": offset},
-    )
+    """
+    rows = client.execute(query, params)
     return [
         {
             "id": row[0],
@@ -181,6 +200,50 @@ def get_sessions(client: Client, limit: int = 20, offset: int = 0) -> list[dict]
             "productivity_score": row[7],
             "flow_state": bool(row[8]),
             "recommendation": row[9],
+        }
+        for row in rows
+    ]
+
+
+def get_developers(client: Client) -> list[dict]:
+    """Retrieves developer profiles with aggregated performance and load analytics."""
+    try:
+        dev_count = client.execute("SELECT count() FROM developers")[0][0]
+        if dev_count == 0:
+            client.execute(
+                """
+                INSERT INTO developers (id, name, email, role)
+                VALUES (1, 'Alex Rivera', 'alex@cognistream.dev', 'Senior Fullstack Engineer')
+                """
+            )
+    except Exception:
+        pass
+
+    rows = client.execute(
+        """
+        SELECT
+            d.id,
+            d.name,
+            d.email,
+            d.role,
+            count(cs.id) AS total_sessions,
+            avg(cm.cognitive_load) AS avg_cognitive_load,
+            avg(cm.productivity_score) AS avg_productivity_score
+        FROM developers d
+        LEFT JOIN coding_sessions cs ON d.id = cs.developer_id
+        LEFT JOIN cognitive_metrics cm ON cs.id = cm.session_id
+        GROUP BY d.id, d.name, d.email, d.role
+        """
+    )
+    return [
+        {
+            "id": row[0],
+            "name": row[1],
+            "email": row[2],
+            "role": row[3],
+            "total_sessions": row[4],
+            "avg_cognitive_load": round(row[5] or 0, 2),
+            "avg_productivity_score": round(row[6] or 0, 2),
         }
         for row in rows
     ]

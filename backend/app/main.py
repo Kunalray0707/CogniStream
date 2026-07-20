@@ -1,13 +1,26 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+from clickhouse_driver.errors import Error as ClickHouseError
 
 from app.config.settings import settings
 from app.routers import analytics
+from app.scripts.create_tables import create_tables
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Perform database table check & auto-seeding on startup if ClickHouse is accessible
+    try:
+        create_tables(reset=False)
+    except Exception as exc:
+        print(f"Warning: Automatic startup database setup deferred (ClickHouse error: {exc})")
+    yield
+
 
 app = FastAPI(
     title=settings.API_TITLE,
     description=settings.API_DESCRIPTION,
     version=settings.API_VERSION,
+    lifespan=lifespan,
 )
 
 # NOTE: the original config used "https://localhost:5173" (wrong scheme)

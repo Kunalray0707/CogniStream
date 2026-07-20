@@ -2,7 +2,7 @@ import axios from "axios";
 
 // VITE_API_URL lets the Docker/production build point at a different
 // host than the local dev default without touching code.
-const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 const client = axios.create({
   baseURL: API_URL,
@@ -53,8 +53,11 @@ export function getFlowState() {
   return get("/analytics/flow-state");
 }
 
-export function getSessions(limit = 10, offset = 0) {
-  return get("/analytics/sessions", { limit, offset });
+export function getSessions(limit = 10, offset = 0, loadLevel = null, flowOnly = null) {
+  const params = { limit, offset };
+  if (loadLevel) params.load_level = loadLevel;
+  if (flowOnly !== null) params.flow_only = flowOnly;
+  return get("/analytics/sessions", params);
 }
 
 export { API_URL };
