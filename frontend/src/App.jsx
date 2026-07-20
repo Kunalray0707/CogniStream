@@ -6,6 +6,7 @@ import ContextSwitchCard from "./components/ContextSwitchCard";
 import FlowStateCard from "./components/FlowStateCard";
 import CognitiveLoadDonut from "./components/CognitiveLoadDonut";
 import SessionsTable from "./components/SessionsTable";
+import RecommendationsBanner from "./components/RecommendationsBanner";
 import { LoadingState, ErrorState, EmptyState } from "./components/StatusStates";
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
     loadDistribution,
     flowState,
     sessions,
+    recommendations,
     status,
     error,
     reload,
@@ -58,7 +60,11 @@ function App() {
           </div>
         ) : (
           <>
-            <section className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <section className="mt-6">
+              <RecommendationsBanner recommendations={recommendations} />
+            </section>
+
+            <section className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
               <StatCard
                 label="Total sessions"
                 value={summary.total_sessions}

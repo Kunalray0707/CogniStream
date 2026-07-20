@@ -53,6 +53,10 @@ export function getFlowState() {
   return get("/analytics/flow-state");
 }
 
+export function getRecommendations() {
+  return get("/analytics/recommendations");
+}
+
 export function getSessions(limit = 10, offset = 0, loadLevel = null, flowOnly = null) {
   const params = { limit, offset };
   if (loadLevel) params.load_level = loadLevel;

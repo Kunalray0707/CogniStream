@@ -13,6 +13,7 @@ from app.schemas.analytics import (
     FlowStateSummary,
     SessionRecord,
     DeveloperRecord,
+    RecommendationSummary,
 )
 
 router = APIRouter(prefix="/analytics", tags=["Analytics"])
@@ -22,6 +23,12 @@ router = APIRouter(prefix="/analytics", tags=["Analytics"])
 def dashboard(client: Client = Depends(get_db)):
     """High-level KPIs shown at the top of the dashboard."""
     return analytics_service.get_dashboard_summary(client)
+
+
+@router.get("/recommendations", response_model=RecommendationSummary)
+def recommendations(client: Client = Depends(get_db)):
+    """Automated team wellness & productivity recommendations."""
+    return analytics_service.get_recommendations(client)
 
 
 @router.get("/developers", response_model=List[DeveloperRecord])

@@ -58,3 +58,10 @@ class DeveloperRecord(BaseModel):
     total_sessions: int
     avg_cognitive_load: float
     avg_productivity_score: float
+
+
+class RecommendationSummary(BaseModel):
+    high_risk_session_count: int
+    high_risk_percentage: float
+    top_recommendation: str
+    actionable_insights: list[str]

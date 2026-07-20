@@ -6,6 +6,7 @@ import {
   getCognitiveLoadDistribution,
   getFlowState,
   getSessions,
+  getRecommendations,
 } from "../services/api";
 
 const initialState = {
@@ -15,6 +16,7 @@ const initialState = {
   loadDistribution: [],
   flowState: [],
   sessions: [],
+  recommendations: null,
 };
 
 export function useDashboardData() {
@@ -26,7 +28,7 @@ export function useDashboardData() {
     setStatus("loading");
     setError(null);
     try {
-      const [summary, trend, contextSwitching, loadDistribution, flowState, sessions] =
+      const [summary, trend, contextSwitching, loadDistribution, flowState, sessions, recommendations] =
         await Promise.all([
           getDashboardSummary(),
           getTrend(30),
@@ -34,8 +36,9 @@ export function useDashboardData() {
           getCognitiveLoadDistribution(),
           getFlowState(),
           getSessions(8, 0),
+          getRecommendations().catch(() => null),
         ]);
-      setData({ summary, trend, contextSwitching, loadDistribution, flowState, sessions });
+      setData({ summary, trend, contextSwitching, loadDistribution, flowState, sessions, recommendations });
       setStatus("success");
     } catch (err) {
       setError(err.message || "Something went wrong while loading the dashboard.");
